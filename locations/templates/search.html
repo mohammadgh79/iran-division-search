@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>جستجوی شهرها</title>
+    <style>
+        body { font-family: Tahoma; padding: 30px; background: #f0f2f5; }
+        .container { max-width: 700px; margin: auto; }
+        .card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        input { padding: 10px; width: 60%; margin-left: 10px; border: 1px solid #ccc; border-radius: 6px; }
+        button { padding: 10px 20px; background: #0066cc; color: white; border: none; border-radius: 6px; cursor: pointer; }
+        .result-item { border-bottom: 1px solid #ddd; padding: 8px; }
+        .result-item:last-child { border-bottom: none; }
+        .badge { background: #e0e0e0; padding: 2px 8px; border-radius: 20px; font-size: 12px; }
+        .parent-name { color: #0066cc; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 style="text-align:center;">📍 جستجوی تقسیمات کشوری</h1>
+        
+        <div class="card">
+            <h2>🔍 جستجو با نام یا کد</h2>
+            <input type="text" id="searchInput" placeholder="مثال: تهران، مشهد، 021...">
+            <button onclick="search()">جستجو</button>
+            <div id="results"></div>
+        </div>
+    </div>
+
+    <script>
+        async function search() {
+            const q = document.getElementById('searchInput').value.trim();
+            if(!q) { alert('متن جستجو را وارد کنید'); return; }
+            
+            const res = await fetch(`/api/search/?q=${encodeURIComponent(q)}`);
+            const data = await res.json();
+            const div = document.getElementById('results');
+            
+            if(data.results && data.results.length > 0) {
+                div.innerHTML = data.results.map(r => 
+                    `<div class="result-item">
+                        <strong>${r.name}</strong> 
+                        ${r.parent ? `<span class="parent-name">(استان: ${r.parent})</span>` : '<span class="badge">استان</span>'}
+                        ${r.code ? `<span class="badge">کد: ${r.code}</span>` : ''}
+                    </div>`
+                ).join('');
+                div.innerHTML += `<div style="margin-top:10px;color:#666;">تعداد نتایج: ${data.count}</div>`;
+            } else {
+                div.innerHTML = '<div class="result-item">❌ چیزی یافت نشد</div>';
+            }
+        }
+    </script>
+</body>
+</html>
